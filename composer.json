@@ -1,18 +1,18 @@
 {
-	"name": "tunnela/query",
-	"description": "Query, easy to use MySQL query builder.",
-	"keywords": ["mysql", "query", "builder"],
-	"license": "MIT",
-	"authors" : [
-		{
-			"name": "Lauri Tunnela",
-			"email": "lauri@tunne.la",
-			"role": "Developer"
-		}
-	],
-	"autoload": {
-		"psr-4": {
-			"Tunnela\\Query\\": "src"
-		}
-	}
+    "name": "tunnela/query",
+    "description": "Query, easy to use MySQL query builder.",
+    "keywords": ["mysql", "query", "builder"],
+    "license": "MIT",
+    "authors" : [
+        {
+            "name": "Lauri Tunnela",
+            "email": "lauri@tunne.la",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Tunnela\\Query\\": "src"
+        }
+    }
 }
