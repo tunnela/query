@@ -1,12 +1,13 @@
 {
     "name": "tunnela/query",
-    "description": "Query, easy to use MySQL query builder.",
+    "description": "Query, the easy to use MySQL query builder.",
     "keywords": ["mysql", "query", "builder"],
     "license": "MIT",
     "authors" : [
         {
             "name": "Lauri Tunnela",
             "email": "lauri@tunne.la",
+            "homepage": "http://tunne.la",
             "role": "Developer"
         }
     ],
