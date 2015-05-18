@@ -87,13 +87,13 @@ class Expression {
 	/**
 	 * Instance factory
 	 */
-    public static function __callStatic($name, $options) {
-        return new static($options, $name);
-    }
+	public static function __callStatic($name, $options) {
+		return new static($options, $name);
+	}
 
-    /**
-     * Returns final expression
-     */
+	/**
+	 * Returns final expression
+	 */
 	public function __toString() {
 		$handler = static::$_handlers[$this->_type];
 		return (string) $handler($this->_options);

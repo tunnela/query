@@ -272,19 +272,19 @@ class Query {
 		return $this;
 	}
 
-    /**
-     * Builds join parameter for later use. Supports all join methods.
-     *
-     * @param string       $type  Join type ie. join-left
-     * @param string|array $table Table name or a key-value array where key is alias and value is table name.
-     */
-    protected function _join($type, $table, $conditionType = null, $conditions = null) {
-    	$conditionType = strtoupper($conditionType);
-    	$conditionTypes = array('USING', 'ON');
+	/**
+	 * Builds join parameter for later use. Supports all join methods.
+	 *
+	 * @param string       $type  Join type ie. join-left
+	 * @param string|array $table Table name or a key-value array where key is alias and value is table name.
+	 */
+	protected function _join($type, $table, $conditionType = null, $conditions = null) {
+		$conditionType = strtoupper($conditionType);
+		$conditionTypes = array('USING', 'ON');
 
-    	if ($conditions && !in_array($conditionType, $conditionTypes)) {
+		if ($conditions && !in_array($conditionType, $conditionTypes)) {
 			throw new Exception("Invalid condition operator `{$conditionType}`.");
-    	}
+		}
 
 		if ($type == 'join-straight') {
 			$query = 'STRAIGHT_JOIN ';
@@ -296,18 +296,18 @@ class Query {
 		$graves = true;
 
 		if (static::isExpression($table)) {
-    		$key = null;
+			$key = null;
 			$value = $table;
 		} else {
 			$table = (array) $table;
 			reset($table);
 			$key = key($table);
 			$value = $table[$key];
-    	}
-    	if (static::isExpression($value)) {
+		}
+		if (static::isExpression($value)) {
 			$value = '(' . $value . ')';
 			$graves = false;
-    	}
+		}
 		$query .= static::getAliasQuery($value, is_string($key) ? $key : null, $graves);
 
 		if ($conditions) {
@@ -322,11 +322,11 @@ class Query {
 		$this->_meta['join'][] = $query;
 
 		return $this;
-    }
+	}
 
-    /**
-     * Adds limit to query
-     */
+	/**
+	 * Adds limit to query
+	 */
 	public function limit($rowCount = null, $offset = null) {
 		if ($rowCount == null) {
 			$this->_meta['limit'] = array();
@@ -336,9 +336,9 @@ class Query {
 		return $this;
 	}
 
-    /**
-     * Adds group by to query
-     */
+	/**
+	 * Adds group by to query
+	 */
 	public function group($group = array()) {
 		$args = func_get_args();
 		$argCount = count($args);
@@ -641,7 +641,7 @@ class Query {
 			foreach ($supplement as $key => $value) {
 				if (!($value instanceof Expression || $value instanceof static)) {
 					$value = static::str($value);
-        		}
+				}
 				$data[] = static::graves($key) . ' = ' . $value;
 			}
 		} else if ($supplement) {
@@ -713,54 +713,54 @@ class Query {
 	 * Builds `having` or `where` parameter for final MySQL query.
 	 */
 	protected function _buildConditionQuery($where, $rootKey = null, $root = true) {
-        $where = (array) $where;
-        $combineWith = 'AND';
+		$where = (array) $where;
+		$combineWith = 'AND';
 
-        if (isset($where[0]) && is_string($where[0]) && preg_match('#^(AND|OR|XOR|&&|\|\|)$#i', $where[0])) {
-        	$combineWith = $where[0];
-        	unset($where[0]);
-        }
-        $data = array();
+		if (isset($where[0]) && is_string($where[0]) && preg_match('#^(AND|OR|XOR|&&|\|\|)$#i', $where[0])) {
+			$combineWith = $where[0];
+			unset($where[0]);
+		}
+		$data = array();
 
-        foreach ($where as $key => $value) {
-        	if ($value instanceof Expression || $value instanceof static) {
-        		$query = '(' . $value . ')';
+		foreach ($where as $key => $value) {
+			if ($value instanceof Expression || $value instanceof static) {
+				$query = '(' . $value . ')';
 
-        		if (is_string($key)) {
-        			$query = static::graves($key) . ' = ' . $query;
-        		}
-        		$data[] = $query;
-        	} else if (is_array($value)) {
-        		$data[] = $this->_buildConditionQuery($value, is_string($key) ? $key : null, false);
-        	} else if (is_int($key) && $rootKey === null) {
-        		$data[] = static::str($value);
-        	} else {
-        		$data[] = static::graves($rootKey === null ? $key : $rootKey) . ' = ' . static::str($value);
-        	}
-        }
-        $data = implode(' ' . $combineWith . ' ', $data);
+				if (is_string($key)) {
+					$query = static::graves($key) . ' = ' . $query;
+				}
+				$data[] = $query;
+			} else if (is_array($value)) {
+				$data[] = $this->_buildConditionQuery($value, is_string($key) ? $key : null, false);
+			} else if (is_int($key) && $rootKey === null) {
+				$data[] = static::str($value);
+			} else {
+				$data[] = static::graves($rootKey === null ? $key : $rootKey) . ' = ' . static::str($value);
+			}
+		}
+		$data = implode(' ' . $combineWith . ' ', $data);
 
-        return $data ? ($root ? '' : '(') . $data . ($root ? ' ' : ')') : '';
+		return $data ? ($root ? '' : '(') . $data . ($root ? ' ' : ')') : '';
 	}
 
 	/**
 	 * Builds `select` parameter for final MySQL query
 	 */
 	protected function _buildSelectQuery() {
-        $select = (array) $this->_meta['select'];
-        $data = array();
+		$select = (array) $this->_meta['select'];
+		$data = array();
 
-        foreach ($select as $key => $value) {
-        	$graves = true;
+		foreach ($select as $key => $value) {
+			$graves = true;
 
-        	if ($value instanceof Expression || $value instanceof static) {
-        		$graves = false;
-        		$value = '(' . $value . ')';
-        	}
-        	$data[] = static::getAliasQuery($value, is_string($key) ? $key : null, $graves);
-        }
-        return $data ? implode(", ", $data) . ' ' : '* ';
-    }
+			if ($value instanceof Expression || $value instanceof static) {
+				$graves = false;
+				$value = '(' . $value . ')';
+			}
+			$data[] = static::getAliasQuery($value, is_string($key) ? $key : null, $graves);
+		}
+		return $data ? implode(", ", $data) . ' ' : '* ';
+	}
 
 	/**
 	 * Adds alias or/and grave accents to query.
@@ -770,17 +770,17 @@ class Query {
 	 * @param  bool   $graves If true, grave accents are added
 	 * @return new query
 	 */
-    public static function getAliasQuery($query, $alias, $graves = true) {
-        if (!$alias) {
-            unset($alias);
-        } else {
-        	$alias = static::graves($alias);
-        }
-        if ($graves) {
-        	$query = static::graves($query);
-        }
-        return implode(' AS ', compact('query', 'alias'));
-    }
+	public static function getAliasQuery($query, $alias, $graves = true) {
+		if (!$alias) {
+			unset($alias);
+		} else {
+			$alias = static::graves($alias);
+		}
+		if ($graves) {
+			$query = static::graves($query);
+		}
+		return implode(' AS ', compact('query', 'alias'));
+	}
 
 	/**
 	 * Used to insert values from key => value based array to parameter string.
