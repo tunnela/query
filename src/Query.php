@@ -609,6 +609,8 @@ class Query {
 		$insert = array();
 
 		foreach ($this->_meta['insert'] as $values) {
+			ksort($values);
+			
 			array_walk($values, function(&$value, $column) use (&$columns) {
 				$columns[] = $column;
 				$value = static::str($value);
