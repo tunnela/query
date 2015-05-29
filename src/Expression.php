@@ -94,17 +94,33 @@ class Expression {
 
 	/**
 	 * Instance factory
+	 * 
+	 * @param  string 	$type Expression type
+	 * @param  array 	$options Options used in expression formation
+	 * @return self
 	 */
-	public static function __callStatic($name, $options) {
-		return new static($options, $name);
+	public static function __callStatic($type, $options) {
+		return new static($options, $type);
 	}
 
 	/**
-	 * Returns final expression
+	 * Converts expression instance to string
+	 * 
+	 * @param  Tunnela\Query $query Instance of Query using current Expression
+	 * @return string
+	 */
+	public function string($query = null) {
+		$handler = static::$_handlers[$this->_type];
+		return (string) $handler($this->_options, $query);
+	}
+
+	/**
+	 * Magic method to return expression string
+	 * 
+	 * @return string
 	 */
 	public function __toString() {
-		$handler = static::$_handlers[$this->_type];
-		return (string) $handler($this->_options);
+		return $this->string();
 	}
 }
 
