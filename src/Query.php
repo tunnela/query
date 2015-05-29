@@ -154,9 +154,9 @@ class Query implements ArrayAccess {
 	 * @return self
 	 */
 	public function insert($inserts = array()) {
-		$isQuery = $this->_meta['insert'] instanceof static;
+		$isQuery = static::isQuery($this->_meta['insert']);
 
-		if ($inserts instanceof static) {
+		if (static::isQuery($inserts)) {
 			$this->_meta['insert'] = $inserts;
 			return $this;
 		}
@@ -216,13 +216,11 @@ class Query implements ArrayAccess {
 		$table = is_array($table) ? $table : array($table);
 
 		foreach ($table as $key => $value) {
-			$isExpression = static::isExpression($value);
-			$isQuery = $value instanceof static;
-
-			if ($isQuery) {
-				$value = '(' . $value . ')';
+			if (is_int($key)) {
+				$this->_meta['from'][] = $value;
+			} else {
+				$this->_meta['from'][$key] = $value;
 			}
-			$this->_meta['from'][] = static::getAliasQuery($value, is_int($key) ? null : $key, !$isExpression);
 		}
 		return $this;
 	}
@@ -511,10 +509,10 @@ class Query implements ArrayAccess {
 		$selects = is_array($selects) ? $selects : array($selects);
 
 		foreach ($selects as $select) {
-			if (!($select instanceof static)) {
+			if (!static::isQuery($select)) {
 				throw new Exception("Invalid union query.");
 			}
-			$this->_meta['unions'][] = 'UNION ' . ($type ? $type . ' ' : '') . '(' . $select . ')';
+			$this->_meta['unions'][] = array($type, $select);
 		}
 		return $this;
 	}
@@ -599,28 +597,31 @@ class Query implements ArrayAccess {
 	 * Builds `union` parameter for final MySQL query.
 	 */
 	protected function _buildUnionQuery() {
-		if ($this->_meta['unions']) {
-			return implode(' ', $this->_meta['unions']) . ' ';
+		$unions = array();
+
+		foreach ($this->_meta['unions'] as $union) {
+			$unions[] = 'UNION ' . ($union[0] ? $union[0] . ' ' : '') . '(' . $union[1] . ')';
 		}
-		return '';
+		return $unions ? implode(' ', $unions) . ' ' : '';
 	}
 
 	/**
 	 * Builds `insert` parameter for final MySQL query.
 	 */
 	protected function _buildInsertQuery() {
-		if ($this->_meta['insert'] instanceof static) {
+		if (static::isQuery($this->_meta['insert'])) {
 			return ' ' . $this->_meta['insert'];
 		}
 		$columns = array();
 		$insert = array();
+		$self = __CLASS__;
 
 		foreach ($this->_meta['insert'] as $values) {
 			ksort($values);
 			
-			array_walk($values, function(&$value, $column) use (&$columns) {
+			array_walk($values, function(&$value, $column) use (&$columns, $self) {
 				$columns[] = $column;
-				$value = static::str($value);
+				$value = $self::str($value);
 			});
 			$insert[] = '(' . implode(', ', $values) . ')';
 		}
@@ -648,7 +649,7 @@ class Query implements ArrayAccess {
 
 		if (is_array($supplement)) {
 			foreach ($supplement as $key => $value) {
-				if (!($value instanceof Expression || $value instanceof static)) {
+				if (!static::isExpression($value)) {
 					$value = static::str($value);
 				}
 				$data[] = static::graves($key) . ' = ' . $value;
@@ -699,7 +700,18 @@ class Query implements ArrayAccess {
 	 * Builds `from` parameter for final MySQL query.
 	 */
 	protected function _buildFromQuery() {
-		$from = implode(', ', $this->_meta['from']);
+		$from = array();
+
+		foreach ($this->_meta['from'] as $key => $value) {
+			$isExpression = static::isExpression($value);
+			$isQuery = static::isQuery($value);
+
+			if ($isQuery) {
+				$value = '(' . $value . ')';
+			}
+			$from[] = static::getAliasQuery($value, is_int($key) ? null : $key, !$isExpression);
+		}
+		$from = $from ? implode(', ', $from) : '';
 
 		return $from ? 'FROM ' . $from . ' ' : '';
 	}
@@ -732,8 +744,8 @@ class Query implements ArrayAccess {
 		$data = array();
 
 		foreach ($where as $key => $value) {
-			if ($value instanceof Expression || $value instanceof static) {
-				$query = '(' . $value . ')';
+			if (static::isExpression($value)) {
+				$query = '(' . $value->string($this) . ')';
 
 				if (is_string($key)) {
 					$query = static::graves($key) . ' = ' . $query;
@@ -762,7 +774,7 @@ class Query implements ArrayAccess {
 		foreach ($select as $key => $value) {
 			$graves = true;
 
-			if ($value instanceof Expression || $value instanceof static) {
+			if (static::isExpression($value)) {
 				$graves = false;
 				$value = '(' . $value . ')';
 			}
@@ -803,7 +815,7 @@ class Query implements ArrayAccess {
 		$self = __CLASS__;
 		return preg_replace_callback('#\{:([a-z0-9_-]+)\}#ui', function($match) use ($params, $qstr, $removeEmpty, $self) {
 			$value = isset($params[$match[1]]) ? $params[$match[1]] : ($removeEmpty ? '' : $match[0]);
-			return $qstr && !Query::isExpression($value) ? $self::str($value) : $value;
+			return $qstr && !$self::isExpression($value) ? $self::str($value) : $value;
 		}, $str);
 	}
 
@@ -815,6 +827,16 @@ class Query implements ArrayAccess {
 	 */
 	public static function isExpression($value) {
 		return $value instanceof Expression || $value instanceof static;
+	}
+
+	/**
+	 * Used to check whether given variable is instance of Query
+	 *
+	 * @param  mixed $value Variable to check
+	 * @return bool
+	 */
+	public static function isQuery($value) {
+		return $value instanceof static;
 	}
 
 	/**
