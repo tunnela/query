@@ -29,6 +29,8 @@ class Expression {
 
 	const ENDS_LIKE = 'endsLike';
 
+	const CALLABLE = 'callable';
+
 	protected $_type;
 
 	protected $_options;
@@ -72,6 +74,12 @@ class Expression {
 					return Query::graves($options[0]) . " LIKE '" . Query::like($options[1]) . "%'";
 				}
 				return "'" . Query::like($options[0]) . "%'";
+			},
+			static::CALLABLE => function($options, $query) {
+				if (!$query || !is_callable($options[0])) {
+					return '';
+				}
+				return $options[0]($query);
 			}
 		);
 
