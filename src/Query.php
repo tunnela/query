@@ -743,7 +743,9 @@ class Query implements \ArrayAccess {
 		$data = array();
 
 		foreach ($where as $key => $value) {
-			if (static::isExpression($value)) {
+			if (is_callable($value)) {
+				$data[] = '(' . $value($this) . ')';
+			} else if (static::isExpression($value)) {
 				$query = '(' . $value->string($this) . ')';
 
 				if (is_string($key)) {
