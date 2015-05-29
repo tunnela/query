@@ -319,7 +319,7 @@ class Query implements ArrayAccess {
 			if (is_array($conditions)) {
 				array_unshift($conditions, array());
 
-				$where = static::invokeMethod('_condition', $conditions);
+				$where = $this->invokeMethod('_condition', $conditions);
 				$conditions = static::_buildConditionQuery($where, null);
 			}
 			$query .= ' ' . $conditionType . ' ' . trim($conditions);
@@ -362,33 +362,32 @@ class Query implements ArrayAccess {
 	 * @copyright Copyright 2014, Union of RAD (http://union-of-rad.org)
 	 * @license http://opensource.org/licenses/bsd-license.php The BSD License
 	 *
-	 * Calls a method on this object with the given parameters. Provides an OO wrapper for
-	 * `forward_static_call_array()`, and improves performance by using straight method calls
+	 * Calls a method on this object with the given parameters. Provides an OO wrapper
+	 * for call_user_func_array, and improves performance by using straight method calls
 	 * in most cases.
 	 *
-	 * @param  string $method Name of the method to call.
-	 * @param  array  $params Parameter list to use when calling `$method`.
-	 * @return mixed  Returns the result of the method call.
+	 * @param string $method  Name of the method to call
+	 * @param array $params  Parameter list to use when calling $method
+	 * @return mixed  Returns the result of the method call
 	 */
-	public static function invokeMethod($method, $params = array()) {
+	public function invokeMethod($method, $params = array()) {
 		switch (count($params)) {
 			case 0:
-				return static::$method();
+				return $this->{$method}();
 			case 1:
-				return static::$method($params[0]);
+				return $this->{$method}($params[0]);
 			case 2:
-				return static::$method($params[0], $params[1]);
+				return $this->{$method}($params[0], $params[1]);
 			case 3:
-				return static::$method($params[0], $params[1], $params[2]);
+				return $this->{$method}($params[0], $params[1], $params[2]);
 			case 4:
-				return static::$method($params[0], $params[1], $params[2], $params[3]);
+				return $this->{$method}($params[0], $params[1], $params[2], $params[3]);
 			case 5:
-				return static::$method($params[0], $params[1], $params[2], $params[3], $params[4]);
+				return $this->{$method}($params[0], $params[1], $params[2], $params[3], $params[4]);
 			default:
-				return forward_static_call_array(array(get_called_class(), $method), $params);
+				return call_user_func_array(array(&$this, $method), $params);
 		}
 	}
-
 
 	/**
 	 * Adds parameters to where clause.
@@ -400,7 +399,7 @@ class Query implements ArrayAccess {
 
 		array_unshift($args, $this->_meta['where']);
 
-		$this->_meta['where'] = static::invokeMethod('_condition', $args);
+		$this->_meta['where'] = $this->invokeMethod('_condition', $args);
 
 		return $this;
 	}
@@ -415,7 +414,7 @@ class Query implements ArrayAccess {
 		
 		array_unshift($args, $this->_meta['having']);
 		
-		$this->_meta['having'] = static::invokeMethod('_condition', $args);
+		$this->_meta['having'] = $this->invokeMethod('_condition', $args);
 
 		return $this;
 	}
