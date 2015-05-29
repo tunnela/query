@@ -29,7 +29,7 @@ class Expression {
 
 	const ENDS_LIKE = 'endsLike';
 
-	const CALLABLE = 'callable';
+	const CALLBACK = 'callback';
 
 	protected $_type;
 
@@ -75,11 +75,11 @@ class Expression {
 				}
 				return "'" . Query::like($options[0]) . "%'";
 			},
-			static::CALLABLE => function($options, $query) {
-				if (!$query || !is_callable($options[0])) {
+			static::CALLBACK => function($options, $query) {
+				if (!$query || empty($options[0]) || !is_callable($options[0])) {
 					return '';
 				}
-				return $options[0]($query);
+				return call_user_func($options[0], $query);
 			}
 		);
 
