@@ -11,7 +11,7 @@ namespace Tunnela\Query;
 /**
  * The MySQL query builder class.
  */
-class Query implements ArrayAccess {
+class Query implements \ArrayAccess {
 
 	const SELECT = 1;
 
