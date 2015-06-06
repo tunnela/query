@@ -120,7 +120,11 @@ class Expression {
 	 * @return string
 	 */
 	public function __toString() {
-		return $this->string();
+		try {
+			return $this->string();
+		} catch (\Exception $e) {
+			trigger_error($e, E_USER_ERROR);
+		}
 	}
 }
 

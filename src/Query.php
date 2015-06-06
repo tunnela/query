@@ -521,7 +521,7 @@ class Query implements \ArrayAccess {
 	 *
 	 * @return MySQL query string
 	 */
-	public function __toString() {
+	public function string() {
 		$params = array();
 
 		if ($this->_type == static::SELECT) {
@@ -929,8 +929,12 @@ class Query implements \ArrayAccess {
 		return $this;
 	}
 
-	public function string() {
-		return (string) $this->__toString();
+	public function __toString() {
+		try {
+			return $this->string();
+		} catch (\Exception $e) {
+			trigger_error($e, E_USER_ERROR);
+		}
 	}
 }
 
