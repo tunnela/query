@@ -288,7 +288,7 @@ class Query implements \ArrayAccess {
 		$conditionTypes = array('USING', 'ON');
 
 		if ($conditions && !in_array($conditionType, $conditionTypes)) {
-			throw new Exception("Invalid condition operator `{$conditionType}`.");
+			throw new \Exception("Invalid condition operator `{$conditionType}`.");
 		}
 
 		if ($type == 'join-straight') {
@@ -296,7 +296,7 @@ class Query implements \ArrayAccess {
 		} else if (preg_match('#^join(\-(inner|cross|(left|right)(\-outer)?|natural(\-(left|right)(\-outer)?)?))?$#', $type, $match)) {
 			$query = ltrim(strtoupper(preg_replace('#\-#', ' ', $match[1])) . ' JOIN ');
 		} else {
-			throw new Exception("Invalid join type `{$type}`.");
+			throw new \Exception("Invalid join type `{$type}`.");
 		}
 		$graves = true;
 
@@ -509,7 +509,7 @@ class Query implements \ArrayAccess {
 
 		foreach ($selects as $select) {
 			if (!static::isQuery($select)) {
-				throw new Exception("Invalid union query.");
+				throw new \Exception("Invalid union query.");
 			}
 			$this->_meta['unions'][] = array($type, $select);
 		}
@@ -533,7 +533,7 @@ class Query implements \ArrayAccess {
 		} else if ($this->_type == static::INSERT) {
 			$query = 'INSERT {:ignore}INTO {:into}{:columns}{:insert}{:supplement}';
 		} else {
-			throw new Exception('Please select a method.');
+			throw new \Exception('Invalid Query type.');
 		}
 		$where = $this->_buildConditionQuery($this->_meta['where']);
 		$having = $this->_buildConditionQuery($this->_meta['having']);
@@ -854,7 +854,7 @@ class Query implements \ArrayAccess {
 		} else if (is_callable($callable)) {
 			static::$_escaper = $callable;
 		} else {
-			throw new Exception("Given argument is not callable nor scalar.");
+			throw new \Exception("Given argument is not callable nor scalar.");
 		}
 	}
 

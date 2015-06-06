@@ -86,7 +86,7 @@ class Expression {
 		$type = $type ?: static::RAW;
 
 		if (!isset(static::$_handlers[$type])) {
-			throw new Exception('Unknown `$type`');
+			throw new \Exception('Unknown expression type `$type`');
 		}
 		$this->_type = $type;
 		$this->_options = $options;
