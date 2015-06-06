@@ -37,3 +37,8 @@ $ php composer.phar install
 
 [composer]: https://getcomposer.org/
 [composer-install]: https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx
+
+## TODO
+
+- Basic usage instructions
+- Tests
