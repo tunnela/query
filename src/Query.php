@@ -501,7 +501,7 @@ class Query implements \ArrayAccess {
 	 * with the old ones.
 	 *
 	 * @param  string $type Union type ie. ALL
-	 * @param  mixed $selects The right side of the union
+	 * @param  mixed  $selects The right side of the union
 	 * @return self
 	 */
 	protected function _union($type, $selects) {
@@ -565,6 +565,9 @@ class Query implements \ArrayAccess {
 	/**
 	 * Adds grave accents to column name. 
 	 * Ie. db.column becomes `db`.`column`.
+	 *
+	 * @param  $str   Column name
+	 * @return string
 	 */
 	public static function graves($str) {
 		$parts = array();
@@ -578,6 +581,8 @@ class Query implements \ArrayAccess {
 
 	/*
 	 * Builds `columns` parameter for final MySQL query.
+	 * 
+	 * @return string
 	 */
 	protected function _buildColumnsQuery() {
 		$cols = array();
@@ -594,6 +599,8 @@ class Query implements \ArrayAccess {
 
 	/**
 	 * Builds `union` parameter for final MySQL query.
+	 * 
+	 * @return string
 	 */
 	protected function _buildUnionQuery() {
 		$unions = array();
@@ -606,6 +613,8 @@ class Query implements \ArrayAccess {
 
 	/**
 	 * Builds `insert` parameter for final MySQL query.
+	 * 
+	 * @return string
 	 */
 	protected function _buildInsertQuery() {
 		if (static::isQuery($this->_meta['insert'])) {
@@ -634,6 +643,8 @@ class Query implements \ArrayAccess {
 
 	/**
 	 * Builds `group` parameter for final MySQL query.
+	 * 
+	 * @return string
 	 */
 	protected function _buildGroupQuery() {
 		return $this->_meta['group'] ? 'GROUP BY ' . implode(', ', $this->_meta['group']) . ' ' : '';
@@ -641,6 +652,8 @@ class Query implements \ArrayAccess {
 
 	/**
 	 * Builds `supplement` parameter for final MySQL query.
+	 * 
+	 * @return string
 	 */
 	protected function _buildSupplementQuery() {
 		$supplement = $this->_meta['supplement'];
@@ -663,6 +676,8 @@ class Query implements \ArrayAccess {
 
 	/**
 	 * Builds `set` parameter for final MySQL query.
+	 * 
+	 * @return string
 	 */
 	protected function _buildSetQuery() {
 		$set = $this->_meta['set'];
@@ -676,6 +691,8 @@ class Query implements \ArrayAccess {
 
 	/**
 	 * Builds `join` parameter for final MySQL query.
+	 * 
+	 * @return string
 	 */
 	protected function _buildJoinQuery() {
 		return $this->_meta['join'] ? implode(' ', $this->_meta['join']) . ' ' : '';
@@ -683,6 +700,8 @@ class Query implements \ArrayAccess {
 
 	/**
 	 * Builds `order` parameter for final MySQL query.
+	 * 
+	 * @return string
 	 */
 	protected function _buildOrderQuery() {
 		return $this->_meta['order'] ? 'ORDER BY ' . implode(', ', $this->_meta['order']) . ' ' : '';
@@ -690,6 +709,8 @@ class Query implements \ArrayAccess {
 
 	/**
 	 * Builds `limit` parameter for final MySQL query.
+	 * 
+	 * @return string
 	 */
 	protected function _buildLimitQuery() {
 		return $this->_meta['limit'] ? 'LIMIT ' . implode(', ', $this->_meta['limit']) : '';
@@ -697,6 +718,8 @@ class Query implements \ArrayAccess {
 
 	/**
 	 * Builds `from` parameter for final MySQL query.
+	 * 
+	 * @return string
 	 */
 	protected function _buildFromQuery() {
 		$from = array();
@@ -717,6 +740,8 @@ class Query implements \ArrayAccess {
 
 	/**
 	 * Builds `delete` parameter for final MySQL query.
+	 * 
+	 * @return string
 	 */
 	protected function _buildDeleteQuery() {
 		return implode(', ', $this->_meta['delete']) . ' ';
@@ -724,6 +749,8 @@ class Query implements \ArrayAccess {
 
 	/**
 	 * Builds `update` parameter for final MySQL query.
+	 * 
+	 * @return string
 	 */
 	protected function _buildUpdateQuery() {
 		return implode(', ', $this->_meta['update']) . ' ';
@@ -731,6 +758,8 @@ class Query implements \ArrayAccess {
 
 	/**
 	 * Builds `having` or `where` parameter for final MySQL query.
+	 * 
+	 * @return string
 	 */
 	protected function _buildConditionQuery($where, $rootKey = null, $root = true) {
 		$where = (array) $where;
@@ -767,6 +796,8 @@ class Query implements \ArrayAccess {
 
 	/**
 	 * Builds `select` parameter for final MySQL query
+	 * 
+	 * @return string
 	 */
 	protected function _buildSelectQuery() {
 		$select = (array) $this->_meta['select'];
@@ -790,7 +821,7 @@ class Query implements \ArrayAccess {
 	 * @param  string $query  Ie. column name or query
 	 * @param  string $alias  Alias for $query
 	 * @param  bool   $graves If true, grave accents are added
-	 * @return new query
+	 * @return string
 	 */
 	public static function getAliasQuery($query, $alias, $graves = true) {
 		if (!$alias) {
@@ -810,10 +841,11 @@ class Query implements \ArrayAccess {
 	 * @param  string $str    String containing parameter placeholders ie. {:param}
 	 * @param  array  $params Parameter array containing key-value pairs ie. param => test. 
 	 *                        Value `test` replaces {:param}
-	 * @return string on which placeholders are replaced with correct values
+	 * @return string         on which placeholders are replaced with correct values
 	 */
 	public static function insertParams($str, $params, $qstr = false, $removeEmpty = true) {
 		$self = __CLASS__;
+
 		return preg_replace_callback('#\{:([a-z0-9_-]+)\}#ui', function($match) use ($params, $qstr, $removeEmpty, $self) {
 			$value = isset($params[$match[1]]) ? $params[$match[1]] : ($removeEmpty ? '' : $match[0]);
 			return $qstr && !$self::isExpression($value) ? $self::str($value) : $value;
