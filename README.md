@@ -20,7 +20,7 @@ To install Query package with Composer, simply add the requirement to your compo
 If this is the first time you use Composer, change to your PHP application directory and run the following command:
 
 ```shell
-$ php composer.phar update
+$ php composer.phar install
 ```
 
 and require autoloader somewhere at the start of your PHP application:
@@ -32,7 +32,7 @@ require 'vendor/autoload.php';
 If this is is not the first time you use Composer, you probably already knew that you should run:
 
 ```shell
-$ php composer.phar install
+$ php composer.phar update
 ```
 
 [composer]: https://getcomposer.org/
