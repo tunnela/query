@@ -29,6 +29,13 @@ class Query implements \ArrayAccess {
 	protected static $_escaper = null;
 
 	/**
+	 * Should union selects be surrounded by brackets?
+	 *
+	 * @var bool
+	 */
+	protected $_unionBrackets = true;
+
+	/**
 	 * Query type
 	 *
 	 * @var integer
@@ -454,6 +461,17 @@ class Query implements \ArrayAccess {
 	}
 
 	/**
+	 * Enable or disable brackets surrounding union selects.
+	 *
+	 * @param  bool $brackets
+	 * @return self
+	 */
+	public function unionBrackets($brackets = true) {
+		$this->_unionBrackets = $brackets;
+		return $this;
+	}
+
+	/**
 	 * This magic method works as an interface for join and union calls.
 	 * It's also used to clear parameter data.
 	 *
@@ -511,7 +529,7 @@ class Query implements \ArrayAccess {
 			if (!static::isQuery($select)) {
 				throw new \Exception("Invalid union query.");
 			}
-			$this->_meta['unions'][] = array($type, $select);
+			$this->_meta['unions'][] = array($type, $select, $this->_unionBrackets);
 		}
 		return $this;
 	}
@@ -557,8 +575,8 @@ class Query implements \ArrayAccess {
 			'limit' => $this->_buildLimitQuery(),
 			'supplement' => $this->_buildSupplementQuery(),
 			'union' => $union,
-			'unionLeft' => $union ? '(' : '',
-			'unionRight' => $union ? ') ' : ''
+			'unionLeft' => $union && $this->_unionBrackets ? '(' : '',
+			'unionRight' => $union && $this->_unionBrackets ? ') ' : ''
 		));
 	}
 
@@ -606,7 +624,8 @@ class Query implements \ArrayAccess {
 		$unions = array();
 
 		foreach ($this->_meta['unions'] as $union) {
-			$unions[] = 'UNION ' . ($union[0] ? $union[0] . ' ' : '') . '(' . $union[1] . ')';
+			$unions[] = 'UNION ' . ($union[0] ? $union[0] . ' ' : '') . 
+			($union[2] ? '(' : '') . $union[1] . ($union[2] ? ')' : '');
 		}
 		return $unions ? implode(' ', $unions) . ' ' : '';
 	}
