@@ -648,7 +648,10 @@ class Query implements \ArrayAccess {
 			
 			array_walk($values, function(&$value, $column) use (&$columns, $self) {
 				$columns[] = $column;
-				$value = $self::str($value);
+
+				if (!$self::isExpression($value)) {
+					$value = $self::str($value);
+				}
 			});
 			$insert[] = '(' . implode(', ', $values) . ')';
 		}
